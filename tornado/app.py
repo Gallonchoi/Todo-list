@@ -83,6 +83,16 @@ class TaskModel(object):
         self.cursor.execute("SELECT * FROM tasks WHERE user_id = ?", param)
         return self.cursor.fetchall()
 
+    def get_finished_by_user(self, uid):
+        param = (uid, )
+        self.cursor.execute("SELECT * FROM tasks WHERE user_id = ? AND status = 1", param)
+        return self.cursor.fetchall()
+
+    def get_unfinshed_by_user(self, uid):
+        param = (uid, )
+        self.cursor.execute("SELECT * FROM tasks WHERE user_id = ? AND status = 0", param)
+        return self.cursor.fetchall()
+
     def create(self, title, description, deadline, user_id):
         self.cursor.execute("INSERT INTO tasks VALUES (NULL, '%s', '%s', '%s', '%s', '%s')" % (title, description, deadline, 0, user_id))
         self.db.commit()
@@ -122,8 +132,10 @@ class HomeHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         user = user=self.get_current_user()
-        tasks = self.task_model.get_by_user(user['id'])
-        self.render('home.html', user=user, tasks=tasks)
+        # tasks = self.task_model.get_by_user(user['id'])
+        finished = self.task_model.get_finished_by_user(user['id'])
+        unfinished = self.task_model.get_unfinshed_by_user(user['id'])
+        self.render('home.html', user=user, finished=finished, unfinished=unfinished)
 
 
 class RegisterHandler(BaseHandler):
