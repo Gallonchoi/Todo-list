@@ -68,7 +68,6 @@ class UserModel(object):
         return hashlib.sha512(password.encode('utf-8')+p_salt.encode('utf-8')).hexdigest() == p_hash
 
 
-
 class BaseHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.cache = self.settings.get('cache').cache
@@ -118,12 +117,19 @@ class AuthLoginHandler(BaseHandler):
         self.redirect('/')
 
 
+class AuthLogoutHandler(BaseHandler):
+    def get(self):
+        self.session.destroy()
+        self.redirect('/')
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r'/', HomeHandler),
             (r'/user/login/?', AuthLoginHandler),
-            (r'/user/signup/?', RegisterHandler)
+            (r'/user/signup/?', RegisterHandler),
+            (r'/user/logout/?', AuthLogoutHandler)
         ]
         ROOT_PATH = os.path.dirname(__file__)
         settings = dict(

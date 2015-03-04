@@ -10,7 +10,7 @@ class Session(object):
     def __init__(self, cache, request_handler):
         self.cache = cache
         self.request_handler = request_handler
-        self.prefix = 'adminSession:'
+        self.prefix = 'userSession:'
 
     def get(self):
         uid = self.request_handler.get_secure_cookie('uid')
@@ -26,7 +26,7 @@ class Session(object):
                 return None
             check_hmac_key = self.generate_hmac(secret.decode('utf-8'), session_id)
             if hmac_key == check_hmac_key:
-                return uid
+                return uid.decode('utf-8')
         return None
 
     def set(self, uid, expires=1):
