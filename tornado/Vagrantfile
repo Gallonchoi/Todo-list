@@ -1,0 +1,24 @@
+SHELL_SCRIPT = <<EOF
+sudo cp /vagrant/source.list /etc/apt/sources.list
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get install -y python3-pip redis-server
+sudo pip3 install tornado redis
+EOF
+
+VAGRANTFILE_API_VERSION = 2
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "ubuntu/trusty64"
+
+  config.vm.define :todo do |todo|
+    todo.vm.network "forwarded_port", guest: 8000, host: 8080
+    todo.vm.provision :shell, :inline => SHELL_SCRIPT, :privileged => false
+  end
+
+  config.vm.provider "virtualbox" do |v|
+    v.gui = false
+    v.name = "todo"
+    v.memory = 512
+  end
+end

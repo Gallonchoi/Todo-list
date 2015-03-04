@@ -1,0 +1,66 @@
+{% extends base.html %}
+
+{% block content %}
+<div id="login-panel">
+  <div class="col-lg-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Please Login</h3>
+      </div>
+      <div class="panel-body">
+        <form role="form" action="/user/login" method="POST">
+        {% module xsrf_form_html() %}
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Enter Username">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+          </div>
+          <button type="submit" class="btn btn-success">Login</button>
+          <button type="reset" class="btn btn-default">Reset</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <button class="btn btn-primary" id="register-btn">New User?</button>
+  </div>
+</div>
+
+<div id="register-panel">
+  <div class="col-lg-6">
+    <button class="btn btn-primary" id="login-btn">Have a account?</button>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">New User</h3>
+      </div>
+      <div class="panel-body">
+        <form role="form" action="/user/signup" method="POST">
+        {% module xsrf_form_html() %}
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Enter Username">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+          </div>
+          <div class="form-group">
+            <label for="re-password">Repeat your password</label>
+            <input type="password" class="form-control" id="re-password" name="re-password" placeholder="Repeat your password">
+          </div>
+          <button type="submit" class="btn btn-success">Sign up</button>
+          <button type="reset" class="btn btn-default">Reset</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% end %}
+{% block externalJs %}
+<script src="{{ static_url('js/login.js') }}"></script>
+{% end %}

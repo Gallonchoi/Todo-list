@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>TODO List implements in Tornado</title>
+    <link href="{{ static_url('bower_components/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet"/>
+    <link href="{{ static_url('css/style.css')}}" rel="stylesheet"/>
+    {% block externalCss %}{% end %}
+  </head>
+  <body class="container">
+    <header>
+      <div class="page-header">
+        <h1>Todo List <small>implements in Tornado</small></h1>
+      </div>
+    </header>
+    <main class="row container">
+      {% block content %}{% end %}
+    </main>
+    <footer>
+      <p>Created by Gallon with <span class="glyphicon glyphicon-heart" aria-hidden="true"></span></p>
+    </footer>
+    <script src="{{ static_url('bower_components/jquery/dist/jquery.min.js') }}"></script>
+    <script src="{{ static_url('bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+    {% block externalJs %}{% end %}
+  </body>
+</html>

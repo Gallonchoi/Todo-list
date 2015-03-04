@@ -1,0 +1,9 @@
+footer:before {
+    width: 100%;
+    height: 1px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    background: #888888;
+    content: "";
+    display: block;
+}
