@@ -100,14 +100,17 @@ class TaskModel(object):
     def finish(self, tid):
         param = (tid, )
         self.cursor.execute("UPDATE tasks SET status = 1 WHERE id = ?", param)
+        self.db.commit()
 
     def revert(self, tid):
         param = (tid, )
         self.cursor.execute("UPDATE tasks SET status = 0 WHERE id = ?", param)
+        self.db.commit()
 
     def delete(self, tid):
         param = (tid, )
         self.cursor.execute("DELETE FROM tasks WHERE id = ?", param)
+        self.db.commit()
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -186,7 +189,6 @@ class FinishedTaskHandler(BaseHandler):
         description = self.get_argument('description')
         deadline = self.get_argument('deadline')
         self.task_model.modify(title, description, deadline)
-        self.redirect('/')
 
     @tornado.web.authenticated
     def delete(self):
@@ -194,7 +196,6 @@ class FinishedTaskHandler(BaseHandler):
         """
         tid = self.get_argument('id')
         self.task_model.delete(tid)
-        self.redirect('/')
 
 
 class UnfinishedTaskHandler(BaseHandler):
@@ -223,7 +224,6 @@ class UnfinishedTaskHandler(BaseHandler):
         """
         tid = self.get_argument('id')
         self.task_model.delete(tid)
-        self.redirect('/')
 
 
 class Application(tornado.web.Application):

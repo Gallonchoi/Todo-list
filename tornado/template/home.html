@@ -28,7 +28,7 @@
           <a class="btn btn-default btn-xs btn-success" href="/task/unfinished/?id={{ item['id'] }}">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Done
           </a>
-          <button type="button" class="btn btn-default btn-xs btn-danger">
+          <button class="btn btn-default btn-xs btn-danger restful" data-method="delete" data-id="{{ item['id'] }}" data-action="/task/unfinished" type="button">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
           </button>
         </span>
@@ -55,7 +55,7 @@
           <a class="btn btn-default btn-xs btn-warning" href="/task/finished/?id={{ item['id'] }}">
             <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> Revert
           </a>
-          <button type="button" class="btn btn-default btn-xs btn-danger">
+          <button class="btn btn-default btn-xs btn-danger restful" data-method="delete" data-id="{{ item['id'] }}" data-action="/task/finished" type="button">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
           </button>
         </span>
@@ -74,7 +74,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="myModalLabel">New task</h4>
       </div>
-      <form role="form" action="/task" method="POST">
+      <form role="form" action="/task/unfinished" method="POST">
         <div class="modal-body">
           {% module xsrf_form_html() %}
           <div class="form-group">
@@ -105,12 +105,39 @@
 {% block externalJs %}
 <script src="{{ static_url('bower_components/moment/min/moment.min.js') }}"></script>
 <script src="{{ static_url('bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js') }}"></script>
-<script type="text/javascript">
-  $(function () {
+<script>
+  $(function() {
       $('#task-deadline').datetimepicker();
       $('#task-deadline').blur(function() {
           $('#deadline').val(Date.parse($(this).val()));
       })
   });
+</script>
+<script>
+  $(function() {
+      var getCookie = function(name) {
+          var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+          return r ? r[1] : undefined;
+      };
+
+      // RESTful API
+      $('.restful').on('click', function() {
+          var httpMethod = $(this).data('method');
+          var dataId = $(this).data('id');
+          var url = $(this).data('action');
+          var xsrf_cookie = getCookie('_xsrf');
+          $.ajax({
+              url: url,
+              data: {id: dataId, _xsrf:xsrf_cookie},
+              method: httpMethod,
+              success: function(data) {
+                  window.location.reload();
+              },
+              error: function() {
+                  window.location.reload();
+              }
+          });
+      });
+  }());
 </script>
 {% end %}
