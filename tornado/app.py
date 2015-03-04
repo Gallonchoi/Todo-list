@@ -43,7 +43,7 @@ class UserModel(object):
         else:
             p_hash, p_salt = self.encrypt_password(password)
             c = self.db.cursor()
-            c.execute("INSERT INTO users VALUES ('%s', '%s', '%s')" % (username, p_hash, p_salt))
+            c.execute("INSERT INTO users VALUES (NULL, '%s', '%s', '%s')" % (username, p_hash, p_salt))
             self.db.commit()
             return {'success': True, 'username': username}
 
@@ -68,12 +68,45 @@ class UserModel(object):
         return hashlib.sha512(password.encode('utf-8')+p_salt.encode('utf-8')).hexdigest() == p_hash
 
 
+class TaskModel(object):
+    def __init__(self, db):
+        self.db = db
+        self.cursor = self.db.cursor()
+
+    def get_by_id(self, tid):
+        param = (tid, )
+        self.cursor.execute("SELECT * FROM tasks WHERE id = ?", param)
+        return self.cursor.fetchone()
+
+    def get_by_user(self, uid):
+        param = (uid, )
+        self.cursor.execute("SELECT * FROM tasks WHERE user_id = ?", param)
+        return self.cursor.fetchall()
+
+    def create(self, title, description, deadline, user_id):
+        self.cursor.execute("INSERT INTO tasks VALUES (NULL, '%s', '%s', '%s', '%s', '%s')" % (title, description, deadline, 0, user_id))
+        self.db.commit()
+
+    def finish(self, tid):
+        param = (tid, )
+        self.cursor.execute("UPDATE tasks SET status = 1 WHERE id = ?", param)
+
+    def revert(self, tid):
+        param = (tid, )
+        self.cursor.execute("UPDATE tasks SET status = 0 WHERE id = ?", param)
+
+    def delete(self, tid):
+        param = (tid, )
+        self.cursor.execute("DELETE FROM tasks WHERE id = ?", param)
+
+
 class BaseHandler(tornado.web.RequestHandler):
     def initialize(self):
         self.cache = self.settings.get('cache').cache
         self.db = self.settings.get('db')
         self.db.row_factory = sqlite3.Row
         self.user_model = UserModel(self.db)
+        self.task_model = TaskModel(self.db)
         self.session = session.Session(self.cache, self)
         self.xsrf_token
 
@@ -88,7 +121,9 @@ class BaseHandler(tornado.web.RequestHandler):
 class HomeHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
-        self.render('home.html', user=self.get_current_user())
+        user = user=self.get_current_user()
+        tasks = self.task_model.get_by_user(user['id'])
+        self.render('home.html', user=user, tasks=tasks)
 
 
 class RegisterHandler(BaseHandler):
@@ -123,13 +158,25 @@ class AuthLogoutHandler(BaseHandler):
         self.redirect('/')
 
 
+class TaskHandler(BaseHandler):
+    @tornado.web.authenticated
+    def post(self):
+        title = self.get_argument('title')
+        description = self.get_argument('description')
+        deadline = self.get_argument('deadline')
+        user_id = self.get_current_user()['id']
+        self.task_model.create(title, description, deadline, user_id)
+        self.redirect('/')
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r'/', HomeHandler),
             (r'/user/login/?', AuthLoginHandler),
             (r'/user/signup/?', RegisterHandler),
-            (r'/user/logout/?', AuthLogoutHandler)
+            (r'/user/logout/?', AuthLogoutHandler),
+            (r'/task/?', TaskHandler)
         ]
         ROOT_PATH = os.path.dirname(__file__)
         settings = dict(
