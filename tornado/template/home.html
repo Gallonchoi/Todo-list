@@ -22,9 +22,12 @@
       {% for item in unfinished %}
       <li class="list-group-item">{{ item['title'] }}
         <span class="pull-right">
-          <button type="button" class="btn btn-default btn-xs btn-success">
+          <!-- <button type="button" class="btn btn-default btn-xs btn-success">
+          <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Done
+          </button> -->
+          <a class="btn btn-default btn-xs btn-success" href="/task/unfinished/?id={{ item['id'] }}">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Done
-          </button>
+          </a>
           <button type="button" class="btn btn-default btn-xs btn-danger">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
           </button>
@@ -46,9 +49,12 @@
       {% for item in finished %}
       <li class="list-group-item">{{ item['title'] }}
         <span class="pull-right">
-          <button type="button" class="btn btn-default btn-xs btn-success">
-            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Finish
-          </button>
+          <!-- <button type="button" class="btn btn-default btn-xs btn-warning">
+          <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> Revert
+          </button> -->
+          <a class="btn btn-default btn-xs btn-warning" href="/task/finished/?id={{ item['id'] }}">
+            <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> Revert
+          </a>
           <button type="button" class="btn btn-default btn-xs btn-danger">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove
           </button>

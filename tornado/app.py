@@ -132,7 +132,6 @@ class HomeHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         user = user=self.get_current_user()
-        # tasks = self.task_model.get_by_user(user['id'])
         finished = self.task_model.get_finished_by_user(user['id'])
         unfinished = self.task_model.get_unfinshed_by_user(user['id'])
         self.render('home.html', user=user, finished=finished, unfinished=unfinished)
@@ -170,14 +169,60 @@ class AuthLogoutHandler(BaseHandler):
         self.redirect('/')
 
 
-class TaskHandler(BaseHandler):
+class FinishedTaskHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self):
+        """ Revert a task
+        """
+        tid = self.get_argument('id')
+        self.task_model.revert(tid)
+        self.redirect('/')
+
+    @tornado.web.authenticated
+    def put(self):
+        """ Modify a task
+        """
+        title = self.get_argument('title')
+        description = self.get_argument('description')
+        deadline = self.get_argument('deadline')
+        self.task_model.modify(title, description, deadline)
+        self.redirect('/')
+
+    @tornado.web.authenticated
+    def delete(self):
+        """ Remove a task
+        """
+        tid = self.get_argument('id')
+        self.task_model.delete(tid)
+        self.redirect('/')
+
+
+class UnfinishedTaskHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self):
+        """ Finish a task
+        """
+        tid = self.get_argument('id')
+        self.task_model.finish(tid)
+        self.redirect('/')
+
     @tornado.web.authenticated
     def post(self):
+        """ Create a task
+        """
         title = self.get_argument('title')
         description = self.get_argument('description')
         deadline = self.get_argument('deadline')
         user_id = self.get_current_user()['id']
         self.task_model.create(title, description, deadline, user_id)
+        self.redirect('/')
+
+    @tornado.web.authenticated
+    def delete(self):
+        """ Remove a task
+        """
+        tid = self.get_argument('id')
+        self.task_model.delete(tid)
         self.redirect('/')
 
 
@@ -188,7 +233,8 @@ class Application(tornado.web.Application):
             (r'/user/login/?', AuthLoginHandler),
             (r'/user/signup/?', RegisterHandler),
             (r'/user/logout/?', AuthLogoutHandler),
-            (r'/task/?', TaskHandler)
+            (r'/task/finished/?', FinishedTaskHandler),
+            (r'/task/unfinished/?', UnfinishedTaskHandler)
         ]
         ROOT_PATH = os.path.dirname(__file__)
         settings = dict(
