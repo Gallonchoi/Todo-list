@@ -43,7 +43,8 @@ class UserModel(object):
         else:
             p_hash, p_salt = self.encrypt_password(password)
             c = self.db.cursor()
-            c.execute("INSERT INTO users VALUES (NULL, '%s', '%s', '%s')" % (username, p_hash, p_salt))
+            c.execute("INSERT INTO users VALUES (NULL, '%s', '%s', '%s')"
+                      % (username, p_hash, p_salt))
             self.db.commit()
             return {'success': True, 'username': username}
 
@@ -51,7 +52,8 @@ class UserModel(object):
         user = self.get_by_username(username)
         if not user:
             return {'success': False, 'msg': 'User not found'}
-        elif self.check_password(password, user['password_hash'], user['password_salt']):
+        elif self.check_password(password,
+                                 user['password_hash'], user['password_salt']):
             return {'success': True, 'user': user}
         else:
             return {'success': False, 'msg': 'Incorrect password'}
@@ -59,13 +61,15 @@ class UserModel(object):
     def encrypt_password(self, password):
         if type(password) is str:
             p_salt = uuid.uuid4().hex
-            p_hash = hashlib.sha512(password.encode('utf-8') + p_salt.encode('utf-8')).hexdigest()
+            p_hash = hashlib.sha512(password.encode('utf-8') +
+                                    p_salt.encode('utf-8')).hexdigest()
         else:
             p_salt = p_hash = None
         return p_hash, p_salt
 
     def check_password(self, password, p_hash, p_salt):
-        return hashlib.sha512(password.encode('utf-8')+p_salt.encode('utf-8')).hexdigest() == p_hash
+        return hashlib.sha512(password.encode('utf-8') +
+                              p_salt.encode('utf-8')).hexdigest() == p_hash
 
 
 class TaskModel(object):
@@ -85,16 +89,19 @@ class TaskModel(object):
 
     def get_finished_by_user(self, uid):
         param = (uid, )
-        self.cursor.execute("SELECT * FROM tasks WHERE user_id = ? AND status = 1", param)
+        sql = "SELECT * FROM tasks WHERE user_id = ? AND status = 1"
+        self.cursor.execute(sql, param)
         return self.cursor.fetchall()
 
     def get_unfinshed_by_user(self, uid):
         param = (uid, )
-        self.cursor.execute("SELECT * FROM tasks WHERE user_id = ? AND status = 0", param)
+        sql = "SELECT * FROM tasks WHERE user_id = ? AND status = 0"
+        self.cursor.execute(sql, param)
         return self.cursor.fetchall()
 
     def create(self, title, description, deadline, user_id):
-        self.cursor.execute("INSERT INTO tasks VALUES (NULL, '%s', '%s', '%s', '%s', '%s')" % (title, description, deadline, 0, user_id))
+        sql = "INSERT INTO tasks VALUES (NULL, '%s', '%s', '%s', '%s', '%s')"
+        self.cursor.execute(sql % (title, description, deadline, 0, user_id))
         self.db.commit()
 
     def finish(self, tid):
@@ -134,10 +141,11 @@ class BaseHandler(tornado.web.RequestHandler):
 class HomeHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
-        user = user=self.get_current_user()
+        user = self.get_current_user()
         finished = self.task_model.get_finished_by_user(user['id'])
         unfinished = self.task_model.get_unfinshed_by_user(user['id'])
-        self.render('home.html', user=user, finished=finished, unfinished=unfinished)
+        self.render('home.html', user=user,
+                    finished=finished, unfinished=unfinished)
 
 
 class RegisterHandler(BaseHandler):
@@ -252,7 +260,8 @@ class Application(tornado.web.Application):
 
 def main():
     parse_command_line()
-    logging.info("Development server is running at http://127.0.0.1:%s" % options.port)
+    logging.info("Development server is running at http://127.0.0.1:%s"
+                 % options.port)
     logging.info("Quit the server with CONTROL-C")
     application = Application()
     application.listen(options.port)
