@@ -95,13 +95,19 @@ class TaskModel(object):
 
     def get_unfinshed_by_user(self, uid):
         param = (uid, )
-        sql = "SELECT * FROM tasks WHERE user_id = ? AND status = 0"
+        sql = "SELECT * FROM tasks WHERE user_id = ? AND status = 0 ORDER BY deadline ASC"
         self.cursor.execute(sql, param)
         return self.cursor.fetchall()
 
     def create(self, title, description, deadline, user_id):
         sql = "INSERT INTO tasks VALUES (NULL, '%s', '%s', '%s', '%s', '%s')"
         self.cursor.execute(sql % (title, description, deadline, 0, user_id))
+        self.db.commit()
+
+    def modify(self, tid, title, description, deadline):
+        param = (title, description, deadline, tid)
+        sql = "UPDATE tasks SET title = ?, description = ?, deadline = ? WHERE id = ?"
+        self.cursor.execute(sql, param)
         self.db.commit()
 
     def finish(self, tid):
@@ -225,6 +231,17 @@ class UnfinishedTaskHandler(BaseHandler):
         user_id = self.get_current_user()['id']
         self.task_model.create(title, description, deadline, user_id)
         self.redirect('/')
+
+    @tornado.web.authenticated
+    def put(self):
+        """ Modify a task
+        """
+        tid = self.get_argument('id')
+        title = self.get_argument('title')
+        description = self.get_argument('description')
+        deadline = self.get_argument('deadline')
+        self.task_model.modify(tid, title, description, deadline)
+        self.write('Good')
 
     @tornado.web.authenticated
     def delete(self):
